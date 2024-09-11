@@ -1,10 +1,10 @@
 symbol_research
-- description : Gather information of {company} stock symbol.
+- description : Gather stock symbol of {company}. 
 - expected_output : Your Final Answer MUST be a stock symbol. 
 
 indicator_research
-- description : Gather information of Traditional Company Indicator and get value of Indicator. You should assess the {company} with provided information. 
-- expected_output : Your Final Answer Must be three value of traditional indicator. And your information of Indicator must be shared with other agents. 
+- description : Gather information of three company indicator. You should get value of ROE, PER, FFO rate of company. You should assess the {company} with provided value. 
+- expected_output : Your Final Answer must be company indicator(ROE, PER, FFO). Your information of indicator must be included.
 
 dividend_rate_analysis
 - description : Get value of dividend rate of {company}. And judge whether {company} is good to invest.
