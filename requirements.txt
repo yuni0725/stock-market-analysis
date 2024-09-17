@@ -16,3 +16,4 @@ pydantic_core==2.18.2
 python-dotenv==1.0.1
 tiktoken==0.5.2
 yfinance==0.2.40
+streamlit==1.27.2
