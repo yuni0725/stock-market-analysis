@@ -11,8 +11,10 @@ langchain-openai==0.0.5
 langchain-text-splitters==0.0.2
 langsmith==0.1.63
 openai==1.30.2
-pydantic==2.7.1
-pydantic_core==2.18.2
+pydantic==2.7.4
+pydantic_core==2.18.4
 python-dotenv==1.0.1
 tiktoken==0.5.2
 yfinance==0.2.40
+streamlit==1.27.2
+pysqlite3-binary
