@@ -386,6 +386,7 @@ async def hedge_fund_manager(company):
     return result.content
 
 
+
 @st.cache_resource(show_spinner="Gather Information...")
 def kick(company):
     text = asyncio.run(hedge_fund_manager(company))
