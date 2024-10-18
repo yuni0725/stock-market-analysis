@@ -6,7 +6,7 @@ import yfinance as yf
 
 from langchain.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
-from langchain_community.utilities import DuckDuckGoSearchAPIWrapper
+from langchain_community.utilities import GoogleSerperAPIWrapper
 from langchain.output_parsers import PydanticOutputParser
 
 import streamlit as st
@@ -145,7 +145,7 @@ class Tools:
             return f"Stock Price is not Provided"
 
 def company_researcher(companys : str):
-    search_result = DuckDuckGoSearchAPIWrapper().run(companys)
+    search_result = GoogleSerperAPIWrapper().run(companys)
 
     output_parser = PydanticOutputParser(pydantic_object=CompanyOverview)
 
@@ -330,6 +330,19 @@ async def stock_price_analyst(symbol):
      
     return result.content
 
+def format_new(news):
+    news = news.replace("\n", "")
+    news = json.loads(news)
+    new = []
+    for i, n in enumerate(news['news']):
+        new.append(f"""{i + 1}. {n['title'].strip()}
+         - Summary : {n['summary'].strip()}
+         - Sentiment : {n['sentiment'].strip()}
+         - URL : {n['url'].strip()}
+        """)
+    
+    return "\n".join(new)
+
 async def hedge_fund_manager(company):
     result = company_researcher(company)
 
@@ -344,6 +357,8 @@ async def hedge_fund_manager(company):
         news_analyst(company_overview, company_symbol),
         stock_price_analyst(company_symbol)
     )
+
+    news = format_new(information[4])
 
     parser = PydanticOutputParser(pydantic_object=AnalysisReport)
 
@@ -368,8 +383,8 @@ async def hedge_fund_manager(company):
             
             Payout Ratio : {payout_ratio}
 
-            News : {news_analysis}
-            (You should get minimum three articles)
+            News :
+            {news_analysis}
             
             Stock Price : {price_analysis}
             
@@ -381,10 +396,9 @@ async def hedge_fund_manager(company):
 
     chain = prompt | llm
 
-    result = chain.invoke({'overview': company_overview, 'symbol': company_symbol, 'ROE': information[0], 'PER': information[1], 'FFO': information[2], 'payout_ratio': information[3], 'news_analysis': information[4], 'price_analysis': information[5], 'format_instructions': parser.get_format_instructions()})
+    result = chain.invoke({'overview': company_overview, 'symbol': company_symbol, 'ROE': information[0], 'PER': information[1], 'FFO': information[2], 'payout_ratio': information[3], 'news_analysis': news, 'price_analysis': information[5], 'format_instructions': parser.get_format_instructions()})
 
     return result.content
-
 
 
 @st.cache_resource(show_spinner="Gather Information...")
@@ -426,53 +440,55 @@ st.markdown(
 
 stock = st.text_input("Write the name of the global company you are interested on.")
 
-st.divider()
-
 if stock:
-    result = kick(stock)
-    result = json.loads(result)
+    #try : 
+        result = kick(stock)
+        result = json.loads(result)
 
-    news = new_formattor(result).replace("`", "")
+        news = new_formattor(result).replace("`", "")
 
-    st.markdown(
-        f"""
+        st.divider()
+        st.markdown(
+            f"""
 
-        <h1>Stock Recommendation for {result['company']}</h1>
+            <h1>Stock Recommendation for {result['company']}</h1>
 
-        <h2>Recommendation : {result['decision']}</h2>
+            <h2>Recommendation : {result['decision']}</h2>
 
-        <h3>Indicator</h3>
+            <h3>Indicator</h3>
 
-        - **ROE(Return on Equity)**
-            - {result['ROE']['ROE_value']}%
-            - {result['ROE']['ROE_report']}
-        
-        - **PER(Price to Earning Ratio)**
-            - {result['PER']['PER_value']}
-            - {result['PER']['PER_report']}
+            - **ROE(Return on Equity)**
+                - {result['ROE']['ROE_value']}%
+                - {result['ROE']['ROE_report']}
+            
+            - **PER(Price to Earning Ratio)**
+                - {result['PER']['PER_value']}
+                - {result['PER']['PER_report']}
 
-        - **FFO(Fund from operations)**
-            - {result["FFO"]['FFO_trending']}
-            - {result['FFO']['FFO_report'].replace("$", "")}
+            - **FFO(Fund from operations)**
+                - {result["FFO"]['FFO_trending']}
+                - {result['FFO']['FFO_report'].replace("$", "")}
 
-        <h3>Dividend Payout Ratio</h3>
+            <h3>Dividend Payout Ratio</h3>
 
-        - Payout Ratio : **{result['dividend_payout_ratio_report']['Dividend_Payout_Ratio']}%**
-        - {result['dividend_payout_ratio_report']['Dividend_Payout_Ratio_report'].replace("$", "")}
+            - Payout Ratio : **{result['dividend_payout_ratio_report']['Dividend_Payout_Ratio']}%**
+            - {result['dividend_payout_ratio_report']['Dividend_Payout_Ratio_report'].replace("$", "")}
 
-        <h3>Company News</h3>
+            <h3>Company News</h3>
 
-        <ul>
-            {news}
-        </ul>
+            <ul>
+                {news}
+            </ul>
 
-        <h3>Stock Price</h3>
+            <h3>Stock Price</h3>
 
-        - Stock Price Trending : {result['stock_price_report']['stock_price_trending'].replace("$", "")}
-        - {result['stock_price_report']['stock_price_report'].replace("$", "")}
+            - Stock Price Trending : {result['stock_price_report']['stock_price_trending'].replace("$", "")}
+            - {result['stock_price_report']['stock_price_report'].replace("$", "")}
 
-        ### Conclusion
-        - {result['recommendation'].replace("$", "")}
+            ### Conclusion
+            - {result['recommendation'].replace("$", "")}
 
 
-        """, unsafe_allow_html=True)
+            """, unsafe_allow_html=True)
+    #except : 
+     #   st.error("Error...Try it later")
