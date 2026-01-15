@@ -140,6 +140,7 @@ class Tools:
 
         try:
             value = str(round(stock.info["payoutRatio"] * 100, 2)) + "%"
+            print(value)
             return f"Dividend Payout Ratio of {symbol} : {value}"
 
         except KeyError:
@@ -409,13 +410,14 @@ async def stock_price_analyst(symbol):
             (
                 "system",
                 """
-                Answer the question using ONLY the following context. Do NOT makeup your own. 
-                
-                Company : {symbol}
-                
-                1 Year's Stock Price
-                {price_stock}
-            """,
+            Answer the question using ONLY the following context. Do NOT makeup your own. 
+            
+            Company : {symbol}
+            
+            1 Year's Stock Price
+            {price_stock}
+
+        """,
             ),
             (
                 "human",
@@ -558,13 +560,11 @@ st.markdown(
     """
     # Stock Analysis
 
-    Write down the name of a company and our Agent will do the research for you. 
-
-    **Be Patient with the result!** 
+    Write down the name of a company and LLM will do the research for you. 
     """
 )
 
-stock = st.text_input("Write the name of the global company you are interested on.")
+stock = st.text_input("Write the name of the famous company you are interested on.")
 
 if stock:
     # try :
